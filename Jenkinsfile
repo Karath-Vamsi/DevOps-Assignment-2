@@ -8,7 +8,7 @@ pipeline {
     stages {
         stage('Checkout') {
             steps {
-                git credentialsId: 'github-creds-college', git branch: 'main', url: 'https://github.com/Karath-Vamsi/DevOps-Assignment-2.git'
+                git branch: 'main', credentialsId: 'github-creds-college', url: 'https://github.com/Karath-Vamsi/DevOps-Assignment-2.git'
             }
         }
 
