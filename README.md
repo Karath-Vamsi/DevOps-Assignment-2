@@ -101,7 +101,7 @@ kubectl port-forward service/streamlit-service 8501:8501
 **Open browser:** `http://localhost:8501`   -->
 
 
-```markdown
+
 # DevOps Assignment 2: Streamlit App Deployment with Jenkins, Docker & Kubernetes
 
 ## Project Overview
