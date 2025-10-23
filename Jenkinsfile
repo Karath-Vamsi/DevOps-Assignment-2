@@ -56,14 +56,6 @@ pipeline {
                 echo 'Skipping cleanup for now...'
             }
         }
-
-        stage('Open App Locally') {
-            steps {
-                withCredentials([file(credentialsId: 'kubeconfig-file', variable: 'KUBECONFIG_FILE')]) {
-                    bat 'start cmd /c "kubectl --kubeconfig %KUBECONFIG_FILE% port-forward service/streamlit-service 8501:8501 & timeout /t 5 & start http://localhost:8501"'
-                }
-            }
-        }
     }
 
     post {
