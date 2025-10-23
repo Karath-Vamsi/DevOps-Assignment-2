@@ -47,8 +47,8 @@ pipeline {
                     echo Checking Kubernetes status...
                     kubectl config current-context
                     echo Deploying to cluster...
-                    kubectl apply -f k8s/deployment.yaml
-                    kubectl apply -f k8s/service.yaml
+                    kubectl apply -f k8/deployment.yaml
+                    kubectl apply -f k8/service.yaml
                 """
             }
         }
