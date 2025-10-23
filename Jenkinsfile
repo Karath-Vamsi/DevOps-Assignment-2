@@ -9,7 +9,7 @@ pipeline {
     }
 
     stages {
-        stage('Checkout Code') {
+        stage('Checkout') {
             steps {
                 git branch: 'main', credentialsId: "${GITHUB_CREDENTIALS}", url: 'https://github.com/Karath-Vamsi/DevOps-Assignment-2.git'
             }
@@ -18,48 +18,42 @@ pipeline {
         stage('Docker Login') {
             steps {
                 withCredentials([usernamePassword(credentialsId: "${DOCKER_CREDENTIALS}", usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
-                    bat """
-                        echo Logging into Docker Hub...
-                        docker logout
-                        docker login -u %DOCKER_USER% -p %DOCKER_PASS%
-                    """
+                    bat 'docker logout'
+                    bat 'docker login -u %DOCKER_USER% -p %DOCKER_PASS%'
                 }
             }
         }
 
         stage('Build Docker Image') {
             steps {
-                bat "docker build -t ${IMAGE_NAME}:${IMAGE_TAG} ."
+                script {
+                    docker.build("${IMAGE_NAME}:${IMAGE_TAG}")
+                }
             }
         }
 
         stage('Push to Docker Hub') {
             steps {
-                bat """
-                    docker push ${IMAGE_NAME}:${IMAGE_TAG}
-                """
+                script {
+                    docker.withRegistry('', DOCKER_CREDENTIALS) {
+                        docker.image("${IMAGE_NAME}:${IMAGE_TAG}").push()
+                    }
+                }
             }
         }
 
         stage('Deploy to Kubernetes') {
             steps {
-                bat """
-                    echo Checking Kubernetes status...
-                    kubectl config current-context
-                    echo Deploying to cluster...
-                    kubectl apply -f k8/deployment.yaml
-                    kubectl apply -f k8/service.yaml
-                """
+                withCredentials([file(credentialsId: 'kubeconfig-file', variable: 'KUBECONFIG_FILE')]) {
+                    bat 'kubectl --kubeconfig %KUBECONFIG_FILE% apply -f k8/deployment.yaml'
+                    bat 'kubectl --kubeconfig %KUBECONFIG_FILE% apply -f k8/service.yaml'
+                }
             }
         }
 
         stage('Cleanup Old Containers') {
             steps {
-                bat """
-                    echo Cleaning up old containers...
-                    docker container prune -f
-                    docker image prune -f
-                """
+                echo 'Skipping cleanup for now...'
             }
         }
     }
