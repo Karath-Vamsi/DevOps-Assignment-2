@@ -3,6 +3,8 @@ pipeline {
 
     environment {
         IMAGE_NAME = "karathcode/devops-a2-streamlit-app"
+        IMAGE_TAG = "latest"
+        DOCKER_CREDENTIALS = "Dockerhub-creds" // Jenkins Docker Hub credentials ID
     }
 
     stages {
@@ -15,17 +17,37 @@ pipeline {
         stage('Build Docker Image') {
             steps {
                 script {
-                    docker.build("${IMAGE_NAME}:latest")
+                    docker.build("${IMAGE_NAME}:${IMAGE_TAG}")
                 }
             }
         }
 
-        stage('Run Container') {
+        stage('Push to Docker Hub') {
             steps {
                 script {
-                    sh "docker run -d -p 8501:8501 ${IMAGE_NAME}:latest"
+                    docker.withRegistry('', DOCKER_CREDENTIALS) {
+                        docker.image("${IMAGE_NAME}:${IMAGE_TAG}").push()
+                    }
                 }
             }
+        }
+
+        stage('Deploy to Kubernetes') {
+            steps {
+                script {
+                    sh "kubectl apply -f k8s/deployment.yaml"
+                    sh "kubectl apply -f k8s/service.yaml"
+                }
+            }
+        }
+    }
+
+    post {
+        success {
+            echo "✅ Deployment successful!"
+        }
+        failure {
+            echo "❌ Pipeline failed!"
         }
     }
 }
