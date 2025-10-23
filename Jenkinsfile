@@ -4,7 +4,7 @@ pipeline {
     environment {
         IMAGE_NAME = "karathcode/devops-a2-streamlit-app"
         IMAGE_TAG = "latest"
-        DOCKER_CREDENTIALS = "Dockerhub-creds" // Jenkins Docker Hub credentials ID
+        DOCKER_CREDENTIALS = "dockerhub-creds" // Jenkins Docker Hub credentials ID
     }
 
     stages {
